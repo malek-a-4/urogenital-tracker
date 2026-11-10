@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1118">
+<title>Urogenital Study Tracker</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1118;--panel:#141e29;--panel2:#182534;--ink:#e7eef5;--muted:#9aabba;--line:#293747;--accent:#52c5b1;--shadow:0 8px 24px rgba(0,0,0,.18)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{max-width:1100px;margin:auto;padding:24px 20px 8px}
+.kicker{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(21px,3vw,27px);line-height:1.2;margin:5px 0 18px;font-weight:750;letter-spacing:-.035em}
+.wrap{max-width:1100px;margin:0 auto;padding:8px 20px 48px}
+.overview{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin:0 0 8px}
+.percent{font-size:42px;line-height:1;font-weight:800;letter-spacing:-.06em}
+.percent small{font-size:17px;color:var(--muted);letter-spacing:0}
+.progress-label{color:var(--muted);font-size:12px;padding-bottom:4px}
+.subject-track{display:flex;gap:3px;height:13px;background:#253342;border-radius:99px;overflow:hidden;margin:12px 0 10px}
+.segment{height:100%;min-width:0;flex:0 0 auto;background:#293747;border-radius:99px;overflow:hidden;position:relative}.segment-fill{height:100%;width:0;border-radius:99px;transition:width .25s ease}
+.legend{display:flex;gap:7px 13px;flex-wrap:wrap;margin-bottom:16px}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:14px 0 17px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.stat strong{display:block;font-size:22px;letter-spacing:-.04em}
+.stat span{font-size:11px;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 14px}
+input[type=search],select,button{font:inherit;border-radius:10px;border:1px solid var(--line);background:#101923;color:var(--ink);padding:9px 11px}
+input[type=search]{flex:1;min-width:180px}
+button{cursor:pointer;font-weight:650}
+button:hover{border-color:#8ba99f}
+.btn-quiet{background:transparent}
+.subject-section{background:var(--panel);border:1px solid var(--line);border-radius:13px;margin:10px 0;overflow:hidden}
+.subject-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;list-style:none}
+.subject-head::-webkit-details-marker{display:none}
+.subject-head:after{content:"⌄";margin-left:auto;color:var(--muted);font-size:17px}
+details[open]>.subject-head:after{content:"⌃"}
+.subject-color{width:4px;align-self:stretch;min-height:27px;border-radius:9px}
+.subject-title{font-weight:750;flex:1}
+.subject-count{font-size:11px;color:var(--muted);white-space:nowrap}
+.mini-track{height:5px;background:#293747;border-radius:99px;margin:0 14px 12px 28px;overflow:hidden}
+.mini-fill{height:100%;border-radius:99px}
+.lecture-list{padding:0 12px 10px}
+.lecture{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border-top:1px solid rgba(125,150,170,.13);padding:10px 3px}
+.info{min-width:0}
+.meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+.num{font-size:10px;font-weight:800;color:#a8d9d0;background:#183b3b;border-radius:5px;padding:2px 5px}
+.online{font-size:9px;font-weight:800;color:#f2c878;background:#49371b;border-radius:5px;padding:2px 5px}
+.topic{font-size:13px;font-weight:650;line-height:1.3}
+.teacher{font-size:11px;color:var(--muted);margin-top:3px}
+.checks{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.check-label{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:9px;white-space:nowrap}
+.check{appearance:none;-webkit-appearance:none;width:15px;height:15px;min-width:15px;min-height:15px;margin:0;padding:0;border:1.4px solid #66798a;border-radius:4px;background:#0e1720;display:grid;place-items:center;cursor:pointer}
+.check:checked{background:var(--accent);border-color:var(--accent)}
+.check:checked:after{content:"✓";font-size:10px;font-weight:900;color:#09201d;line-height:1}
+.lecture.studied .topic{color:#8eaaa2}
+.empty{padding:25px;text-align:center;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:12px}
+footer{margin-top:22px;color:var(--muted);font-size:11px;text-align:center}
+@media(max-width:560px){header{padding:19px 14px 6px}.wrap{padding:8px 12px 35px}.stats{gap:6px}.stat{padding:9px}.stat strong{font-size:19px}.lecture{grid-template-columns:minmax(0,1fr) auto;gap:5px}.checks{gap:6px}.check-label{font-size:8px}.topic{font-size:12px}}
+@media print{.toolbar,button{display:none!important}body{background:white;color:#111}.subject-section,.stat{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+ <div class="kicker">Third Year · 2026/2027</div>
+ <h1>Urogenital Study Tracker</h1>
+</header>
+<main class="wrap">
+ <section aria-label="Overall progress">
+  <div class="overview"><div class="percent" id="percent">0<small>%</small></div><div class="progress-label">of classes studied</div></div>
+  <div class="subject-track" id="subjectTrack"></div>
+  <div class="legend" id="legend"></div>
+ </section>
+ <section class="stats">
+  <div class="stat"><strong id="studiedCount">0/85</strong><span>Classes studied</span></div>
+  <div class="stat"><strong id="revisionCount">0/170</strong><span>Revisions done</span></div>
+  <div class="stat"><strong id="remainingCount">85</strong><span>Classes remaining</span></div>
+ </section>
+ <div class="toolbar">
+  <input id="search" type="search" placeholder="Search lectures, doctors or subjects…" aria-label="Search lectures">
+  <select id="status" aria-label="Filter classes"><option value="all">All classes</option><option value="todo">To study</option><option value="revise">To revise</option><option value="done">Fully done</option></select>
+  <button class="btn-quiet" id="export">Backup</button>
+  <button class="btn-quiet" id="importBtn">Import</button>
+  <input id="importFile" type="file" accept="application/json" hidden>
+  <button class="btn-quiet" id="reset">Reset</button>
+ </div>
+ <div id="lectureList"></div>
+ <footer>Progress saves automatically in this browser on this device. Different browsers/devices keep separate progress. Use Backup to transfer progress.</footer>
+</main>
+<script>
+const lectures = [
+[1,8,"Mon 9 Nov","Anatomy","Anatomy of kidney","Dr. Youssef Shoukry"],
+[2,8,"Mon 9 Nov","Anatomy","Anatomy of the ureter","Dr. Youssef Shoukry"],
+[3,8,"Mon 9 Nov","Histology","Microscopic structure of renal corpuscles & blood renal barrier","Dr. Caroline Saba"],
+[4,8,"Mon 9 Nov","Histology","Microscopic structure of renal tubules & interstitium","Dr. Caroline Saba"],
+[5,8,"Tue 10 Nov","Physiology","Function of kidney & functional unit","Dr. Elsayed Ghonemy"],
+[6,8,"Tue 10 Nov","Physiology","Renal blood flow & glomerular filtration 1","Dr. Elsayed Ghonemy"],
+[7,8,"Tue 10 Nov","Anatomy","Anatomy of urinary bladder & urethra","Dr. Esmat"],
+[8,8,"Tue 10 Nov","Physiology","Renal blood flow & glomerular filtration 2","Dr. Elsayed Ghonemy"],
+[9,8,"Wed 11 Nov","Histology","Microscopic structure of juxtaglomerular apparatus & the urinary passages","Dr. Caroline Saba"],
+[10,8,"Wed 11 Nov","Anatomy","Development of the urinary system 1 (Embryology)","Dr. Walaa"],
+[11,8,"Wed 11 Nov","Physiology","Renal plasma clearance","Dr. Elsayed Ghonemy"],
+[12,8,"Wed 11 Nov","Physiology","Functions of proximal convoluted tubule 1","Dr. Elsayed Ghonemy"],
+[13,8,"Thu 12 Nov","Physiology","Functions of proximal convoluted tubule 2","Dr. Elsayed Ghonemy"],
+[14,8,"Thu 12 Nov","Biochemistry","Renal metabolism","Dr. Noha Salah"],
+[15,8,"Thu 12 Nov","Biochemistry","Amino acid metabolism 1","Dr. Hythem"],
+[16,9,"Sun 15 Nov","Biochemistry","Amino acid metabolism 2","Dr. Haytham"],
+[17,9,"Sun 15 Nov","Physiology","Function of loop of Henle, DCT & collecting tubules","Dr. Elsayed Ghonemy"],
+[18,9,"Sun 15 Nov","Physiology","Urine concentration","Dr. Elsayed Ghonemy"],
+[19,9,"Sun 15 Nov","Physiology","Regulation ECF osmolality, volume & electrolyte balance","Dr. Elsayed Ghonemy"],
+[20,9,"Mon 16 Nov","Biochemistry","Inherited renal diseases","Dr. Basma"],
+[21,9,"Mon 16 Nov","Biochemistry","Steroid hormone synthesis","Dr. Noha Salah"],
+[22,9,"Mon 16 Nov","Anatomy","Development of the urinary system 2","Dr. Walaa"],
+[23,9,"Mon 16 Nov","Physiology","Acid-base balance","Prof. Amira Metwally"],
+[24,9,"Tue 17 Nov","Physiology","Acid-base disturbance 1","Prof. Amira Metwally"],
+[25,9,"Tue 17 Nov","Physiology","Acid-base disturbance 2","Prof. Amira Metwally"],
+[26,9,"Tue 17 Nov","Physiology","Micturition reflex effect of disordered renal function","Prof. Amira Metwally"],
+[27,9,"Tue 17 Nov","Pharmacology","Electrolyte disturbances – acid base imbalance 1","Dr. Doaa Ibrahim"],
+[28,9,"Wed 18 Nov","Pharmacology","Electrolyte disturbances – acid base imbalance 2","Dr. Doaa Ibrahim"],
+[29,9,"Wed 18 Nov","Microbiology","Urinary tract infections 1","Dr. Amany Tharwat"],
+[30,9,"Wed 18 Nov","Microbiology","Urinary tract infections 2","Dr. Amany Tharwat"],
+[31,9,"Wed 18 Nov","Parasitology","Schistosomiasis","Prof. Hala Sobhy"],
+[32,10,"Sun 22 Nov","Pharmacology","Treatment of urinary tract infections","Dr. Doaa Ibrahim"],
+[33,10,"Sun 22 Nov","Pathology","Introduction to glomerulonephritis","Dr. Manal Salman"],
+[34,10,"Sun 22 Nov","Pathology","Nephritic syndrome 1","Dr. Manal Salman"],
+[35,10,"Mon 23 Nov","Anatomy","Introduction to pelvis & pelvic floor muscles, vessels & nerves of pelvis","Dr. Esmat"],
+[36,10,"Mon 23 Nov","Anatomy","Perineum & ischiorectal fossa 1","Dr. Esmat"],
+[37,10,"Mon 23 Nov","Pathology","Nephrotic syndrome 1","Dr. Manal Salman"],
+[38,10,"Mon 23 Nov","Pathology","Nephrotic syndrome 2","Dr. Manal Salman"],
+[39,10,"Tue 24 Nov","Anatomy","Male external genital organ","Dr. E. (name abbreviated in schedule)"],
+[40,10,"Tue 24 Nov","Anatomy","Male internal genital organ","Dr. Ghaida"],
+[41,10,"Tue 24 Nov","Pathology","Tubulointerstitial diseases","Dr. Manal Salman"],
+[42,10,"Tue 24 Nov","Pathology","Vascular and obstructive renal diseases","Dr. Manal Salman"],
+[44,10,"Wed 25 Nov","Pathology","Renal tumors & renal failure","Dr. Manal Salman"],
+[45,10,"Wed 25 Nov","Pathology","Diseases of ureter & urinary bladder","Dr. Lobna Abdelfattah"],
+[46,10,"Wed 25 Nov","Pharmacology","Drug therapy in chronic kidney diseases (renal failure)","Dr. Doaa Ibrahim"],
+[47,11,"Sun 29 Nov","Histology","Microscopic structure of the testis 1","Dr. Sahar Omar"],
+[48,11,"Sun 29 Nov","Histology","Microscopic structure of male genital ducts & accessory glands","Dr. Sahar Omar"],
+[49,11,"Sun 29 Nov","Physiology","Function of male reproductive system 1","Dr. Ahmed Ezzat"],
+[50,11,"Sun 29 Nov","Physiology","Function of male reproductive system 2","Dr. Ahmed Ezzat"],
+[51,11,"Mon 30 Nov","Pathology","Diseases of scrotal sac, testis and penis","Dr. Faten Wagdy"],
+[52,11,"Mon 30 Nov","Pathology","Diseases of the prostate & male urethra","Dr. Faten Wagdy"],
+[53,11,"Mon 30 Nov","Pharmacology","Drug therapy of prostatic diseases","Dr. Doaa Ibrahim"],
+[54,11,"Mon 30 Nov","Pharmacology","Erectile dysfunction","Dr. Doaa Ibrahim"],
+[55,11,"Tue 1 Dec","Anatomy","Female external genital organs and breast","Dr. Eman"],
+[56,11,"Tue 1 Dec","Anatomy","Ovary and uterine tubes","Dr. Eman"],
+[57,11,"Tue 1 Dec","Physiology","Ovarian & uterine cycle and hormonal control 1","Dr. Ienass Bahaa"],
+[58,11,"Tue 1 Dec","Physiology","Ovarian & uterine cycle and hormonal control 2","Dr. Ienass Bahaa"],
+[59,11,"Wed 2 Dec","Histology","Microscopic structure of the ovary","Dr. Sahar Omar"],
+[60,11,"Wed 2 Dec","Physiology","Endocrine functions of ovary & puberty and menopause","Dr. Ineass Bahaa"],
+[61,11,"Wed 2 Dec","Anatomy","Uterus & vagina 1","Dr. Noha Gaber"],
+[62,11,"Wed 2 Dec","Anatomy","Uterus & vagina 2","Dr. Noha Gaber"],
+[63,12,"Sun 6 Dec","Histology","Microscopic structure of body of uterus, cervix & vagina","Dr. Sahar Omar"],
+[64,12,"Sun 6 Dec","Histology","Microscopic structure of placenta & mammary glands","Dr. Sahar Omar"],
+[65,12,"Sun 6 Dec","Microbiology","Genital infection 1","Dr. Safaa Khattab"],
+[66,12,"Mon 7 Dec","Microbiology","Genital infection 2","Dr. Safaa Khattab"],
+[67,12,"Mon 7 Dec","Anatomy","Development of male genital system (Embryology) 1","Dr. Esmat"],
+[68,12,"Mon 7 Dec","Anatomy","Development of female genital system (Embryology) 2","Dr. Esmat"],
+[69,12,"Mon 7 Dec","Parasitology","Trichomoniasis","Dr. Omnia Sobhy"],
+[70,12,"Tue 8 Dec","Pathology","Diseases of vulva & vagina","Dr. Heba Ahmed"],
+[71,12,"Tue 8 Dec","Pathology","Diseases of cervix","Dr. Heba Ahmed"],
+[72,12,"Tue 8 Dec","Physiology","Gestation","Dr. Ineass Bahaa"],
+[73,12,"Tue 8 Dec","Physiology","Parturition & lactation","Dr. Ineass Bahaa"],
+[74,12,"Wed 9 Dec","Pathology","Diseases of body of uterus 1","Dr. Magda Abdelsalam"],
+[75,12,"Wed 9 Dec","Pathology","Diseases of body of uterus 2","Dr. Magda Abdelsalam"],
+[78,12,"Wed 9 Dec","Microbiology","Congenital infection 1","Dr. Safaa Khattab"],
+[79,12,"Wed 9 Dec","Microbiology","Congenital infection 2","Dr. Safaa Khattab"],
+[81,13,"Mon 14 Dec","Pathology","Diseases of the breast 1","Dr. Faten Wagdy"],
+[82,13,"Mon 14 Dec","Pathology","Diseases of the breast 2","Dr. Faten Wagdy"],
+[83,13,"Mon 14 Dec","Pharmacology","Female fertility","Dr. Doaa Ibrahim"],
+[84,13,"Mon 14 Dec","Pharmacology","Contraception","Dr. Doaa Ibrahim"],
+["online-cl-uti",10,"Sun 22 Nov","Clinical","Clinical: Urinary tract infections","Online session · lecturer not specified in schedule","ONLINE"],
+[76,13,"Sun 13 Dec","Pathology","Diseases of pregnancy","Dr. Rana Ahmed","ONLINE"],
+[77,13,"Sun 13 Dec","Pathology","Diseases of fallopian tubes & ovaries","Dr. Rana Ahmed","ONLINE"],
+["online-cl-gti",13,"Sun 13 Dec","Clinical","Clinical: Genital tract infections","Online session · lecturer not specified in schedule","ONLINE"],
+[80,13,"Sun 13 Dec","Pharmacology","Sexually transmitted diseases","Dr. Doaa Ibrahim","ONLINE"]
+];
+const STORE="urogenital-tracker-v3";
+const subjects=[...new Set(lectures.map(x=>x[3]))].sort();
+const palette=["#f05b87","#9878f7","#32b9e8","#ed9b50","#478bf2","#56c6a0","#f07862","#c38bdc","#d4bd61"];
+const colors=Object.fromEntries(subjects.map((s,i)=>[s,palette[i%palette.length]]));
+let studied=new Set(), revisions={};
+const openSubjects=new Set();
+try{
+ const saved=JSON.parse(localStorage.getItem(STORE)||"null");
+ if(saved){studied=new Set(saved.studied||[]);revisions=saved.revisions||{};}
+ else{
+  studied=new Set(JSON.parse(localStorage.getItem("urogenital-tracker-v2")||localStorage.getItem("urogenital-tracker-v1")||"[]"));
+ }
+}catch(e){}
+const $=id=>document.getElementById(id);
+const key=id=>String(id);
+function save(){localStorage.setItem(STORE,JSON.stringify({studied:[...studied],revisions}));}
+function revCount(id){return (revisions[key(id)]||[]).length;}
+function updateStats(){
+ const total=lectures.length,done=studied.size,rev=Object.values(revisions).reduce((n,a)=>n+(a||[]).length,0);
+ $("percent").innerHTML=Math.round(done/total*100)+'<small>%</small>';
+ $("studiedCount").textContent=`${done}/${total}`;
+ $("revisionCount").textContent=`${rev}/${total*2}`;
+ $("remainingCount").textContent=total-done;
+ const track=$("subjectTrack"),legend=$("legend");track.innerHTML="";legend.innerHTML="";
+ subjects.forEach(s=>{
+  const all=lectures.filter(x=>x[3]===s),count=all.filter(x=>studied.has(x[0])).length;
+  const seg=document.createElement("div");seg.className="segment";
+  seg.style.width=(all.length/total*100)+"%";
+  seg.title=`${s}: ${count}/${all.length} studied`;
+  const fill=document.createElement("div");fill.className="segment-fill";
+  fill.style.width=(count/all.length*100)+"%";fill.style.background=colors[s];
+  seg.append(fill);track.append(seg);
+  const item=document.createElement("span");item.className="legend-item";
+  const dot=document.createElement("i");dot.className="dot";dot.style.background=colors[s];
+  item.append(dot,document.createTextNode(`${s} ${count}/${all.length}`));legend.append(item);
+ });
+}
+function render(){
+ const q=$("search").value.trim().toLowerCase(),status=$("status").value;
+ const filtered=lectures.filter(x=>{
+  const rs=revCount(x[0]),isStudied=studied.has(x[0]);
+  const statusOk=status==="all"||(status==="todo"&&!isStudied)||(status==="revise"&&isStudied&&rs<2)||(status==="done"&&isStudied&&rs===2);
+  return statusOk&&(!q||x.join(" ").toLowerCase().includes(q));
+ });
+ const root=$("lectureList");root.innerHTML="";
+ if(!filtered.length){root.innerHTML='<div class="empty">No classes match your filters.</div>';return}
+ subjects.forEach(s=>{
+  const items=filtered.filter(x=>x[3]===s);if(!items.length)return;
+  const all=lectures.filter(x=>x[3]===s),count=all.filter(x=>studied.has(x[0])).length;
+  const section=document.createElement("details");section.className="subject-section";section.open=openSubjects.has(s);
+  section.addEventListener("toggle",()=>{if(section.open)openSubjects.add(s);else openSubjects.delete(s);});
+  const head=document.createElement("summary");head.className="subject-head";
+  const color=document.createElement("span");color.className="subject-color";color.style.background=colors[s];
+  const title=document.createElement("span");title.className="subject-title";title.textContent=s;
+  const counter=document.createElement("span");counter.className="subject-count";counter.textContent=`${count}/${all.length} studied`;
+  head.append(color,title,counter);section.append(head);
+  const bar=document.createElement("div");bar.className="mini-track";
+  const fill=document.createElement("div");fill.className="mini-fill";fill.style.width=(count/all.length*100)+"%";fill.style.background=colors[s];bar.append(fill);section.append(bar);
+  const list=document.createElement("div");list.className="lecture-list";
+  items.forEach(x=>{
+   const row=document.createElement("div");row.className="lecture"+(studied.has(x[0])?" studied":"");
+   const info=document.createElement("div");info.className="info";
+   const meta=document.createElement("div");meta.className="meta";
+   const num=document.createElement("span");num.className="num";num.textContent=typeof x[0]==="number"?`L${x[0]}`:"CLINICAL";
+   meta.append(num);
+   if(x[6]==="ONLINE"||String(x[0]).startsWith("online-")){const tag=document.createElement("span");tag.className="online";tag.textContent="ONLINE";meta.append(tag);}
+   const topic=document.createElement("div");topic.className="topic";topic.textContent=x[4];
+   const teacher=document.createElement("div");teacher.className="teacher";teacher.textContent=`${x[2]} · ${x[5]}`;
+   info.append(meta,topic,teacher);
+   const checks=document.createElement("div");checks.className="checks";
+   const addCheck=(label,checked,onChange)=>{
+    const wrap=document.createElement("label");wrap.className="check-label";const cb=document.createElement("input");cb.type="checkbox";cb.className="check";cb.checked=checked;cb.setAttribute("aria-label",label);cb.addEventListener("change",()=>onChange(cb.checked));const caption=document.createElement("span");caption.textContent=label;wrap.append(cb,caption);checks.append(wrap);
+   };
+   addCheck("Study",studied.has(x[0]),v=>{if(v)studied.add(x[0]);else studied.delete(x[0]);save();updateStats();render()});
+   [1,2].forEach(n=>addCheck(`Rev ${n}`,(revisions[key(x[0])]||[]).includes(n),v=>{
+    const arr=new Set(revisions[key(x[0])]||[]);if(v)arr.add(n);else arr.delete(n);revisions[key(x[0])]=[...arr].sort();if(!revisions[key(x[0])].length)delete revisions[key(x[0])];save();updateStats();render();
+   }));
+   row.append(info,checks);list.append(row);
+  });
+  section.append(list);root.append(section);
+ });
+}
+$("search").addEventListener("input",render);$("status").addEventListener("change",render);
+$("reset").addEventListener("click",()=>{if(confirm("Clear all study and revision progress?")){studied.clear();revisions={};save();updateStats();render()}});
+$("export").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({module:"Urogenital",studied:[...studied],revisions},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="urogenital-progress.json";a.click();URL.revokeObjectURL(a.href)});
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());const valid=new Set(lectures.map(x=>key(x[0])));studied=new Set((data.studied||data.completed||[]).filter(n=>valid.has(key(n))));revisions={};Object.entries(data.revisions||{}).forEach(([id,a])=>{if(valid.has(id))revisions[id]=[...new Set(a.filter(n=>n===1||n===2))]});save();updateStats();render();alert("Progress imported.")}catch{alert("That file could not be read.")}e.target.value=""});
+updateStats();render();
+</script>
+</body>
+</html>
